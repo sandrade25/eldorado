@@ -39,7 +39,7 @@ python-dateutil==2.8.1
 python-decouple==3.3
 pytz==2020.1
 requests==2.24.0
-riddler @ git+https://gitlab.com/gotham2/riddler.git@430b81c62b6a1db73517ef2078a4c6405cd9541d
+# riddler @ git+https://gitlab.com/gotham2/riddler.git@430b81c62b6a1db73517ef2078a4c6405cd9541d
 six==1.15.0
 sniffio==1.2.0
 SQLAlchemy>=1.4
