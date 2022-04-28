@@ -10,7 +10,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 sys.path.append(BASE_DIR)
 
 # additional imports from app files
-from app.settings import TEMP_DATABASE_URL
 from app.database import Base
 from app.models import *
 
@@ -22,9 +21,8 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
-print("alemebic ENV: ", TEMP_DATABASE_URL)
-# overwrite sql alchemy url with database environment url in settings
-config.set_main_option("sqlalchemy.url", TEMP_DATABASE_URL)
+
+
 # config.set_main_option("script_location", )
 # add your model's MetaData object here
 # for 'autogenerate' support
