@@ -10,7 +10,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 sys.path.append(BASE_DIR)
 
 # additional imports from app files
-from app.database import Base
+from app.postgres_db import Base
 from app.models import *
 
 # this is the Alembic Config object, which provides
