@@ -28,18 +28,18 @@ class MongoCollection:
     def __init__(self, collection: mongoCollection):
         self.collection = collection
 
-    def __getattribute__(self, __name: str) -> Any:
-        if __name not in ["collection"]:
-            try:
-                self.collections[__name]
-            except KeyError:
-                raise AttributeError
-            else:
-                if not self.collections[__name]:
-                    self.collections[__name] = MongoCollection(collection=self.db[__name])
-                return self.collections[__name]
-        else:
-            return super().__getattribute__(__name)
+    # def __getattribute__(self, __name: str) -> Any:
+    #     if __name not in ["collection"]:
+    #         try:
+    #             self.collections[__name]
+    #         except KeyError:
+    #             raise AttributeError
+    #         else:
+    #             if not self.collections[__name]:
+    #                 self.collections[__name] = MongoCollection(collection=self.db[__name])
+    #             return self.collections[__name]
+    #     else:
+    #         return super().__getattribute__(__name)
 
 class MongoDB:
 
@@ -50,10 +50,9 @@ class MongoDB:
         self.collections: Dict[str, Union[MongoCollection, None]] = {collection_name: None for collection_name in self.db.list_collection_names()}
 
     def __getattribute__(self, __name: str) -> Any:
-        # FIXME: this is throwing RecursionError when calling MongoSession.admin
-        # you should be able to make that call and have access to this MongoDB object. 
-        # but it throws a recursion error.
-        if __name not in ["db_name", "db"]:
+        if __name in ["db_name", "db", "collections"]:
+            return super(MongoDB, self).__getattribute__(__name)
+        else:
             try:
                 self.collections[__name]
             except KeyError:
@@ -62,18 +61,29 @@ class MongoDB:
                 if not self.collections[__name]:
                     self.collections[__name] = MongoCollection(collection=self.db[__name])
                 return self.collections[__name]
-        else:
-            return super(MongoDB, self).__getattribute__(__name)
 
-class MongoSession:
+
+class MongoSession():
     def __init__(self):
         self.utils = MongoUtils
         self.client = pymongo.MongoClient(self.utils.mongo_url(username=MONGO_USER, password=MONGO_PASSWORD, host=MONGO_HOST, port=MONGO_PORT))
 
-        self.dbs: Dict[str, Union[MongoDB, None]] = {db_name: None for db_name in self.client.list_database_names()}
+        self.dbs: Dict[str, Union[MongoDB, None]] = {db_name: None for db_name in self.client.list_database_names() if db_name not in ["admin", "config", "local"]}
+
+    @property
+    def admin(self):
+        return self.client["admin"]
+
+    @property
+    def config(self):
+        return  self.client["config"]
+
+    @property
+    def local(self):
+        return self.client["local"]
 
     def __getattribute__(self, __name: str) -> Any:
-        if __name in ["utils", "client", "dbs"]:
+        if __name in ["utils", "client", "dbs", "admin", "config", "local"]:
             return super(MongoSession, self).__getattribute__(__name)
         else:
             try:
