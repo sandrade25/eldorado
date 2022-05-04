@@ -2,24 +2,22 @@
 high level mongodb variables
 """
 
-import sys, os
+import os
+import sys
+from typing import Any, Dict, Union
+
 import pymongo
 from pymongo.collection import Collection as mongoCollection
-from typing import Any, Dict, Union
-from pymongo.database import Database as mongoDatabase
-
-
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
-from app.settings import MONGO_HOST, MONGO_PORT, MONGO_USER, MONGO_PASSWORD
-
+from app.settings import MONGO_HOST, MONGO_PASSWORD, MONGO_PORT, MONGO_USER
 
 
 class MongoUtils:
     @staticmethod
-    def mongo_url(username:str, password:str, host:str, port:str):
+    def mongo_url(username: str, password: str, host: str, port: str):
         return f"mongodb://{username}:{password}@{host}:{port}/"
 
 
@@ -40,13 +38,15 @@ class MongoCollection:
     #     else:
     #         return super().__getattribute__(__name)
 
-class MongoDB:
 
+class MongoDB:
     def __init__(self, mongo_client: pymongo.MongoClient, db_name: str):
         self.db_name = db_name
         self.db = mongo_client[self.db_name]
 
-        self.collections: Dict[str, Union[MongoCollection, None]] = {collection_name: None for collection_name in self.db.list_collection_names()}
+        self.collections: Dict[str, Union[MongoCollection, None]] = {
+            collection_name: None for collection_name in self.db.list_collection_names()
+        }
 
     def __getattribute__(self, __name: str) -> Any:
         if __name in ["db_name", "db", "collections"]:
@@ -62,12 +62,20 @@ class MongoDB:
                 return self.collections[__name]
 
 
-class MongoSession():
+class MongoSession:
     def __init__(self):
         self.utils = MongoUtils
-        self.client = pymongo.MongoClient(self.utils.mongo_url(username=MONGO_USER, password=MONGO_PASSWORD, host=MONGO_HOST, port=MONGO_PORT))
+        self.client = pymongo.MongoClient(
+            self.utils.mongo_url(
+                username=MONGO_USER, password=MONGO_PASSWORD, host=MONGO_HOST, port=MONGO_PORT
+            )
+        )
 
-        self.dbs: Dict[str, Union[MongoDB, None]] = {db_name: None for db_name in self.client.list_database_names() if db_name not in ["admin", "config", "local"]}
+        self.dbs: Dict[str, Union[MongoDB, None]] = {
+            db_name: None
+            for db_name in self.client.list_database_names()
+            if db_name not in ["admin", "config", "local"]
+        }
 
     @property
     def admin(self):
@@ -75,7 +83,7 @@ class MongoSession():
 
     @property
     def config(self):
-        return  self.client["config"]
+        return self.client["config"]
 
     @property
     def local(self):
@@ -93,5 +101,3 @@ class MongoSession():
                 if not self.dbs[__name]:
                     self.dbs[__name] = MongoDB(self.client, __name)
                 return self.dbs[__name]
-
-
