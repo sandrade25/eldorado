@@ -1,4 +1,4 @@
-from mongokit import Collection 
+from mongokit import Document 
 import datetime
 
 
