@@ -1,8 +1,20 @@
-from dataclasses import dataclass
+from mongokit import Collection 
+import datetime
 
-@dataclass
-class MongoTest:
-    __collection__ : str
-    id: int
-    test_field: int
-    test_field2: float
+
+class MongoTest(Document):
+    __collection__ = 'test_col'
+    __database__ = 'test_db'
+    structure = {
+        'title': str,
+        'body': str,
+        'author': str,
+        'date_creation': datetime.datetime,
+        'rank': int,
+        'tags': [str],
+    }
+    required_fields = ['title', 'author', 'date_creation']
+    default_values = {
+        'rank': 0,
+        'date_creation': datetime.datetime.utcnow
+    }
