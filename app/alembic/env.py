@@ -6,9 +6,6 @@ import os, sys
 
 from alembic import context
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(BASE_DIR)
-
 # additional imports from app files
 from app.postgres_db import Base
 from app.models import *

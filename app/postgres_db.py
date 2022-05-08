@@ -5,8 +5,7 @@ import sys, os
 from sqlalchemy.ext.declarative import declarative_base
 from alembic import command, config, script
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_DIR)
+from app.settings import BASE_DIR
 
 Base = declarative_base()
 
