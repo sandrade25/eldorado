@@ -1,5 +1,5 @@
 from app.postgres_db import Base
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.dialects.postgresql import BIGINT
 
 
