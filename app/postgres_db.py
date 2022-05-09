@@ -3,7 +3,7 @@ high level database variables
 """
 from sqlalchemy.ext.declarative import declarative_base
 
-from alembic import command, config, script
+from alembic import command, config
 from app.dynamo.database_connection import DatabaseConnection
 from app.settings import BASE_DIR
 
@@ -11,12 +11,6 @@ Base = declarative_base()
 
 
 class DatabaseUtils:
-    # @staticmethod
-    # def get_db(db_connection: DatabaseConnection):
-    #     from app.postgres_db import DatabaseSession
-
-    #     return DatabaseSession(db_connection.db_identifier)
-
     @staticmethod
     def db_url(username: str, password: str, host: str, port: str):
         return f"postgresql+psycopg2://{username}:{password}@{host}:{port}"

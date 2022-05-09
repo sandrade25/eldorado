@@ -1,11 +1,6 @@
 import arrow
 from app.dynamo.base_classes import BaseMeta
-from pynamodb.attributes import (
-    BooleanAttribute,
-    NumberAttribute,
-    UnicodeAttribute,
-    UTCDateTimeAttribute,
-)
+from pynamodb.attributes import BooleanAttribute, UnicodeAttribute, UTCDateTimeAttribute
 from pynamodb.models import Model
 
 
