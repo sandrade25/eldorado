@@ -1,0 +1,2 @@
+class ServiceDataError(Exception):
+    pass

@@ -15,7 +15,7 @@ class DatabaseConnection(Model):
     port = UnicodeAttribute()
 
     live = BooleanAttribute(default=True)
-    maintainence = BooleanAttribute(default=False)
+    maintenance = BooleanAttribute(default=False)
 
     date_created = UTCDateTimeAttribute(default=arrow.utcnow().datetime)
 
