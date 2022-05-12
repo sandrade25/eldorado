@@ -8,11 +8,12 @@ class DatabaseConnection(Model):
     class Meta(BaseMeta):
         table_name = "database_connection"
 
-    db_identifier = UnicodeAttribute(hash_key=True)
+    schema = UnicodeAttribute(hash_key=True)
     username = UnicodeAttribute()
     password = UnicodeAttribute()
     host = UnicodeAttribute()
     port = UnicodeAttribute()
+    db_name = UnicodeAttribute()
 
     live = BooleanAttribute(default=True)
     maintenance = BooleanAttribute(default=False)

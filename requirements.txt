@@ -1,6 +1,7 @@
 alembic==1.7.7
 anyio==3.5.0
 appdirs==1.4.4
+arrow==1.2.2
 asgiref==3.5.1
 atomicwrites==1.4.0
 attrs==19.3.0

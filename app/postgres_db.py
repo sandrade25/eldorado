@@ -19,9 +19,9 @@ Base = declarative_base()
 
 class DatabaseUtils:
     @staticmethod
-    def get_db_data(db_id):
+    def get_db_data(schema):
         try:
-            return DatabaseConnection.get(db_id)
+            return DatabaseConnection.get(schema)
         except DoesNotExist:
             raise
 
@@ -30,10 +30,10 @@ class DatabaseUtils:
         return f"postgresql+psycopg2://{username}:{password}@{host}:{port}"
 
     @staticmethod
-    def create_revision(db_id: str, message: str):
+    def create_revision(schema: str, message: str):
         _config = config.Config(f"{BASE_DIR}/app/alembic.ini")
 
-        db_model = DatabaseConnection.get(db_id)
+        db_model = DatabaseConnection.get(schema)
 
         # overwrite sql alchemy url with database environment url in settings
         _config.set_main_option(
@@ -49,8 +49,8 @@ class DatabaseUtils:
         command.revision(config=_config, message=message, autogenerate=True)
 
     @staticmethod
-    def upgrade_db(db_id: str, revision: str = "head") -> None:
-        db_model = DatabaseConnection.get(db_id)
+    def upgrade_db(schema: str, revision: str = "head") -> None:
+        db_model = DatabaseConnection.get(schema)
         db_model.maintenance = True
         db_model.save()
         _config = config.Config(f"{BASE_DIR}/app/alembic.ini")
@@ -74,9 +74,9 @@ class DatabaseUtils:
 
 
 class DatabaseSession:
-    def __init__(self, db_id: str, force_connection: bool = False):
+    def __init__(self, schema: str, force_connection: bool = False):
         self.utils = DatabaseUtils
-        self.db_id = db_id
+        self.schema = schema
 
         if not force_connection and self.db_data.maintenance:
             raise Exception
@@ -97,7 +97,7 @@ class DatabaseSession:
 
     @cached_property
     def db_data(self):
-        return self.utils.get_db_data(db_id=self.db_id)
+        return self.utils.get_db_data(schema=self.schema)
 
     @cached_property
     def db_url(self):
