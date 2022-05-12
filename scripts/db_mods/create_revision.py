@@ -3,8 +3,8 @@ import typer
 from app.postgres_db import DatabaseUtils
 
 
-def main(db_code: str, message: str):
-    DatabaseUtils.create_revision(schema=db_code, message=message)
+def main(schema: str, message: str):
+    DatabaseUtils.create_revision(schema=schema, message=message)
 
 
 if __name__ == "__main__":

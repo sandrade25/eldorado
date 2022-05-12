@@ -1,5 +1,7 @@
 import configparser
-import os, sys
+import os
+import sys
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
@@ -21,6 +23,8 @@ DYNAMO_PORT = config.get("DYNAMO", "DYNAMO_PORT")
 
 POSTRGES_HOST = config.get("POSTGRES", "POSTRGES_HOST")
 POSTGRES_PORT = config.get("POSTGRES", "POSTGRES_PORT")
+POSTGRES_USER = config.get("POSTGRES", "POSTGRES_USER")
+POSTGRES_PASSWORD = config.get("POSTGRES", "POSTGRES_PASSWORD")
 
 MONGO_HOST = config.get("MONGO", "MONGO_HOST")
 MONGO_PORT = config.get("MONGO", "MONGO_PORT")

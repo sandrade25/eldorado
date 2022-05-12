@@ -3,8 +3,8 @@ import typer
 from app.postgres_db import DatabaseUtils
 
 
-def main(db_code: str, revision: str = "head"):
-    DatabaseUtils.upgrade_db(db_code=db_code, revision=revision)
+def main(schema: str, revision: str = "head"):
+    DatabaseUtils.upgrade_db(schema=schema, revision=revision)
 
 
 if __name__ == "__main__":
