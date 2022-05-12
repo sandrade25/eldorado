@@ -31,7 +31,12 @@ class DatabaseConnection(Model):
         self.db_name = db_name if db_name else "eldorado-{}".format(uuid4().hex[:12])
 
     def save(self, *args, **kwargs):
-        self._ensure_unique_values()
+        self._ensure_unique_values(
+            schema=self.schema,
+            username=self.username,
+            password=self.password,
+            db_name=self.db_name,
+        )
         super().save(*args, **kwargs)
 
 

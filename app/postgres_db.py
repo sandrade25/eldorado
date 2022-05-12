@@ -79,9 +79,9 @@ class DatabaseUtils:
 
 
 class DatabaseSession:
-    def __init__(self, schema: str, force_connection: bool = False):
+    def __init__(self, schema: str, force_connection: bool = False, public_schema: bool = False):
         self.utils = DatabaseUtils
-        self.schema = schema
+        self.schema = schema if not public_schema else "public"
 
         if not force_connection and self.db_data.maintenance:
             raise Exception
@@ -99,6 +99,22 @@ class DatabaseSession:
         self.rollback = None
         self.session.close()
         self.engine.dispose()
+
+    def add_new_schema(self, db_model: DatabaseConnection = None):
+        if not db_model:
+            db_model = DatabaseConnection(
+                username=self.db_data.username,
+                password=self.db_data.password,
+                host=self.db_data.host,
+                port=self.db_data.port,
+                db_name=self.db_data.db_name,
+            )
+
+        db_model.save()
+        with self.engine.begin() as connection:
+            _config = self.utils.get_alembic_config(db_model=db_model)
+            _config.attributes["connection"] = connection
+            command.upgrade(_config, "head")
 
     @cached_property
     def db_data(self):
