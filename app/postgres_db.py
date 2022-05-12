@@ -26,16 +26,22 @@ class DatabaseUtils:
             raise
 
     @staticmethod
-    def db_url(username: str, password: str, host: str, port: str):
-        return f"postgresql+psycopg2://{username}:{password}@{host}:{port}"
+    def db_url(username: str, password: str, host: str, port: str, db_name: str = ""):
+        return f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}"
 
     @staticmethod
-    def create_revision(schema: str, message: str):
+    def get_alembic_config(
+        db_model: DatabaseConnection = None,
+        skip_schema: bool = False,
+        modded: bool = True,
+    ):
         _config = config.Config(f"{BASE_DIR}/app/alembic.ini")
+        if not modded:
+            return _config
 
-        db_model = DatabaseConnection.get(schema)
+        if not db_model:
+            raise Exception
 
-        # overwrite sql alchemy url with database environment url in settings
         _config.set_main_option(
             "sqlalchemy.url",
             DatabaseUtils.db_url(
@@ -45,6 +51,17 @@ class DatabaseUtils:
                 port=db_model.port,
             ),
         )
+        if not skip_schema:
+            _config.attributes["schema"] = db_model.schema
+        else:
+            _config.attributes["schema"] = "public"
+
+        return _config
+
+    @staticmethod
+    def create_revision(schema: str, message: str):
+        db_model = DatabaseConnection.get(schema)
+        _config = DatabaseUtils.get_alembic_config(db_model=db_model)
 
         command.revision(config=_config, message=message, autogenerate=True)
 
@@ -53,20 +70,8 @@ class DatabaseUtils:
         db_model = DatabaseConnection.get(schema)
         db_model.maintenance = True
         db_model.save()
-        _config = config.Config(f"{BASE_DIR}/app/alembic.ini")
 
-        # db = DatabaseUtils.get_db(db_model)
-
-        # overwrite sql alchemy url with database environment url in settings
-        _config.set_main_option(
-            "sqlalchemy.url",
-            DatabaseUtils.db_url(
-                username=db_model.username,
-                password=db_model.password,
-                host=db_model.host,
-                port=db_model.port,
-            ),
-        )
+        _config = DatabaseUtils.get_alembic_config(db_model=db_model)
 
         command.upgrade(_config, revision)
         db_model.maintenance = False
@@ -106,11 +111,14 @@ class DatabaseSession:
             password=self.db_data.password,
             host=self.db_data.host,
             port=self.db_data.port,
+            db_name=self.db_data.db_name,
         )
 
     def _connect_db(self):
         try:
-            engine = create_engine(self.db_url)
+            engine = create_engine(
+                self.db_url, connect_args={"options": "-csearch_path={}".format(self.schema)}
+            )
             SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
             session = SessionLocal()
             metadata = MetaData(bind=self.engine)
