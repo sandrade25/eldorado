@@ -49,6 +49,7 @@ class DatabaseUtils:
                 password=db_model.password,
                 host=db_model.host,
                 port=db_model.port,
+                db_name=db_model.db_name,
             ),
         )
         if not skip_schema:
@@ -59,15 +60,13 @@ class DatabaseUtils:
         return _config
 
     @staticmethod
-    def create_revision(schema: str, message: str):
-        db_model = DatabaseConnection.get(schema)
+    def create_revision(db_model, message: str):
         _config = DatabaseUtils.get_alembic_config(db_model=db_model)
 
         command.revision(config=_config, message=message, autogenerate=True)
 
     @staticmethod
-    def upgrade_db(schema: str, revision: str = "head") -> None:
-        db_model = DatabaseConnection.get(schema)
+    def upgrade_db(db_model, revision: str = "head") -> None:
         db_model.maintenance = True
         db_model.save()
 
@@ -81,7 +80,10 @@ class DatabaseUtils:
 class DatabaseSession:
     def __init__(self, schema: str, force_connection: bool = False, public_schema: bool = False):
         self.utils = DatabaseUtils
-        self.schema = schema if not public_schema else "public"
+        self.schema = schema
+        self.db_data
+        if public_schema:
+            self.schema = "public"
 
         if not force_connection and self.db_data.maintenance:
             raise Exception
@@ -100,6 +102,11 @@ class DatabaseSession:
         self.session.close()
         self.engine.dispose()
 
+    def create_revision(self, message: str):
+        db_model = self.db_data
+        db_model.schema = self.schema
+        self.utils.create_revision(db_model, message)
+
     def add_new_schema(self, db_model: DatabaseConnection = None):
         if not db_model:
             db_model = DatabaseConnection(
@@ -111,9 +118,11 @@ class DatabaseSession:
             )
 
         db_model.save()
+
         with self.engine.begin() as connection:
             _config = self.utils.get_alembic_config(db_model=db_model)
             _config.attributes["connection"] = connection
+
             command.upgrade(_config, "head")
 
     @cached_property
@@ -130,14 +139,15 @@ class DatabaseSession:
             db_name=self.db_data.db_name,
         )
 
-    def _connect_db(self):
+    def _connect_db(self, schema_override: str = None):
+        schema = self.schema if not schema_override else schema_override
         try:
             engine = create_engine(
-                self.db_url, connect_args={"options": "-csearch_path={}".format(self.schema)}
+                self.db_url, connect_args={"options": "-csearch_path={}".format(schema)}
             )
             SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
             session = SessionLocal()
-            metadata = MetaData(bind=self.engine)
+            metadata = MetaData(bind=engine)
             metadata.create_all(engine)
             return engine, session
         except (DoesNotExist, AttributeError, ValueError):
