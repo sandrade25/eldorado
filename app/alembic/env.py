@@ -1,14 +1,14 @@
+import os
+import sys
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-import os, sys
-
-from alembic import context
+from app.models import *
 
 # additional imports from app files
-from app.postgres_db import Base
-from app.models import *
+from app.utils.database import Base
+from sqlalchemy import engine_from_config, pool
+
+from alembic import context
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -33,7 +33,6 @@ target_metadata = Base.metadata
 # ... etc.
 
 
-
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
@@ -52,6 +51,7 @@ def run_migrations_offline():
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_schemas=True,
     )
 
     with context.begin_transaction():
@@ -70,10 +70,14 @@ def run_migrations_online():
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+    schema = config.attributes.get("schema", "public")
 
     with connectable.connect() as connection:
+        connection.execute(f'CREATE SCHEMA IF NOT EXISTS "{schema}"')
+        connection.execute(f"set search_path to {schema}")
+        connection.dialect.default_schema_name = schema
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata, include_schemas=True
         )
 
         with context.begin_transaction():
