@@ -1,5 +1,5 @@
 from app.enums.user import SessionState
-from app.postgres_db import Base
+from app.utils.database import Base
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import BIGINT
 from sqlalchemy.orm import relationship
