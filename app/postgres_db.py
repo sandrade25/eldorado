@@ -7,12 +7,9 @@ from functools import cached_property
 
 from pynamodb.exceptions import DoesNotExist
 from sqlalchemy import MetaData, create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from alembic import command, config
 from app.dynamo.database_connection import DatabaseConnection
-from app.settings import BASE_DIR
 from app.utils.database import DatabaseUtils
 
 
