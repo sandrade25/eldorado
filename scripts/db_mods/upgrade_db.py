@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import typer
 from app.alembic.migrations import upgrade_db
-from app.dynamo.database_connection import DatabaseConnection
-from app.postgres_db import DatabaseUtils
 
 
 def main(schema: str, revision: str = "head"):
