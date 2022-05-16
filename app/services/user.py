@@ -7,7 +7,7 @@ from sqlalchemy.exc import NoResultFound
 class UserService:
     def __init__(self, db, user_id: int, update_session: bool = False):
         self.db = db
-        self.user = self.get_user
+        self.user = self.get_user(user_id)
 
     def get_user(self, user_id: int):
         try:

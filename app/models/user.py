@@ -1,4 +1,4 @@
-from app.enums.user import SessionStaleReason
+from app.enums.user import SessionState
 from app.postgres_db import Base
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import BIGINT
@@ -25,6 +25,6 @@ class UserSession(Base):
     user_id = Column(BIGINT, ForeignKey("eldorado_user.id", ondelete="CASCADE"), nullable=False)
     start_datetime = Column(DateTime(timezone=True), default=func.now())
     last_activity = Column(DateTime(timezone=True), default=func.now())
-    stale_reason = Column(String, default=SessionStaleReason.active)
+    stale_reason = Column(String, default=SessionState.active)
 
     user = relationship("User", back_populates="sessions")

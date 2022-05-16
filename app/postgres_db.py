@@ -58,11 +58,7 @@ class DatabaseSession:
 
         db_model.save()
 
-        with self.engine.begin() as connection:
-            _config = self.utils.get_alembic_config(db_model=db_model)
-            _config.attributes["connection"] = connection
-
-            command.upgrade(_config, "head")
+        self.utils.upgrade_db(db_model=db_model)
 
     @cached_property
     def db_data(self):

@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SessionStaleReason(str, Enum):
+class SessionState(str, Enum):
     active = "active"
-    inactivity = "inactivity"
-    logout = "logout"
+    inactivity = "inactive"
+    logout = "logged_out"

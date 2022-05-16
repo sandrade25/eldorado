@@ -19,7 +19,7 @@ def main(first_revision: Optional[bool] = False):
     db = DatabaseSession(schema=db_model.schema, public_schema=True)
     if first_revision:
         db.create_revision(message="first_revision")
-    print(db_model.__dict__)
+
     db.add_new_schema(db_model=db_model)
 
 

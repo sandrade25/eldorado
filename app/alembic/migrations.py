@@ -6,7 +6,6 @@ from alembic.runtime import migration
 
 def upgrade_db(schema: str, revision: str = "head") -> None:
     db = DatabaseSession(schema)
-    print(db.db_url)
     db.db_data.maintenance_mode = True
     db.db_data.save()
     _config = config.Config("/var/www/eldorado/app/alembic.ini")
