@@ -77,7 +77,7 @@ def run_migrations_online():
         connection.execute(f"set search_path to '{schema}'")
         connection.dialect.default_schema_name = schema
         context.configure(
-            connection=connection, target_metadata=target_metadata, include_schemas=True
+            connection=connection, target_metadata=target_metadata, include_schemas=False
         )
 
         with context.begin_transaction():
