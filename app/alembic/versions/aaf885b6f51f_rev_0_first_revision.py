@@ -35,7 +35,7 @@ def upgrade():
     sa.Column('user_id', sa.BIGINT(), nullable=False),
     sa.Column('start_datetime', sa.DateTime(timezone=True), nullable=True),
     sa.Column('last_activity', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('stale_reason', sa.String(), nullable=True),
+    sa.Column('status', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['eldorado_user.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )

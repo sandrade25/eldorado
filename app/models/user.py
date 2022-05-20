@@ -13,13 +13,13 @@ class UserSession(Base):
     user_id = Column(BIGINT, ForeignKey("eldorado_user.id", ondelete="CASCADE"), nullable=False)
     start_datetime = Column(DateTime(timezone=True), default=func.now())
     last_activity = Column(DateTime(timezone=True), default=func.now())
-    stale_reason = Column(String, default=SessionState.active)
+    status = Column(String, default=SessionState.active)
     is_active = column_property(
         case(
             [
                 (
                     and_(
-                        stale_reason.not_in([SessionState.inactivity, SessionState.logged_out]),
+                        status.not_in([SessionState.inactivity, SessionState.logged_out]),
                         (func.now() - datetime.timedelta(minutes=5)) < last_activity,
                     ),
                     True,
@@ -42,7 +42,7 @@ class User(Base):
     password = Column(String, nullable=False)
     is_deleted = Column(Boolean, default=False)
     join_datetime = Column(DateTime(timezone=True), default=func.now())
-    most_recent_session = column_property(
+    most_recent_session: UserSession = column_property(
         select(UserSession)
         .order_by(UserSession.last_activity.desc())
         .limit(1)
