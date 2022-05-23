@@ -1,14 +1,12 @@
-import traceback
 from contextvars import ContextVar
+from typing import Any
 
 from app.postgres_db import DatabaseSession
 from fastapi import Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from typing import Any
-from app.settings import ENVIRONMENT
-
 
 db_context: ContextVar[DatabaseSession] = ContextVar("db")
+
 
 class DBSessionMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, **kwargs):
@@ -44,3 +42,7 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
                 return response
             except Exception:
                 return Response(content="Unexpected error occurred", status_code=500)
+
+
+def get_db_context():
+    return db_context.get(None)

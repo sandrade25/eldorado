@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from app.enums.user import SessionState
 from app.utils.database import Base
