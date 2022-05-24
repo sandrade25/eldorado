@@ -11,7 +11,10 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request, call_next):
         headers = request.headers
-        schema = headers.get("schema", None)
+        token = ContextManager.get(ContextEnum.decoded_token)
+        schema = None
+        if token:
+            schema = token.get("schema")
 
         if schema in ["null", ""]:
             schema = None
@@ -35,6 +38,7 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
             # if no schema provided, assume route doesnt need it.
             # let route throw exception and handle it here to return a 500.
             try:
+                ContextManager.create_empty_context(ContextEnum.db)
                 response = await call_next(request)
                 return response
             except Exception:

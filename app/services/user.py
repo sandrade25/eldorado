@@ -2,31 +2,33 @@ import datetime as dt
 
 import arrow
 from app.enums.user import SessionState
+from app.model_operators.user import UserOperator
 from app.models.user import User, UserSession
+from app.postgres_db import DatabaseSession
+from app.schemas.user import UserCreate
 from app.services.exceptions import ServiceDataError
 from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 
 
 class UserService:
+    user_operator: UserOperator = UserOperator
+
+    @staticmethod
+    def create_users(db: DatabaseSession, users: UserCreate, commit: bool = False):
+        UserService.user_operator.batch_create(db, users, commit=commit)
+
     def __init__(
-        self, db, user_id: int, update_session_to_now: bool = False, non_deleted: bool = True
+        self,
+        db: DatabaseSession,
+        user_id: int,
+        update_session_to_now: bool = False,
+        non_deleted: bool = True,
     ):
         self.db = db
-        self.user = self.get_user(user_id, non_deleted)
+        self.user = self.user_operator.get_user_by_id(db, user_id, non_deleted)
         if update_session_to_now:
             self.update_session()
-
-    def get_user(self, user_id: int, non_deleted: bool = True):
-        stmt = select(User).where(User.id == user_id)
-        if non_deleted:
-            stmt = stmt.where(User.is_deleted.is_(False))
-
-        try:
-            user = self.db.session.execute(stmt).scalar_one_or_none()
-            return user
-        except NoResultFound:
-            raise
 
     def _assert_user(self):
         if not self.user:

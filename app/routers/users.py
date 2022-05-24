@@ -22,7 +22,7 @@ async def user_list(
     return {
         "user_service": user_service,
         "db": db,
-        "users": db.session.execute(select(User)).all(),
+        "users": db.session.execute(select(User)).all() if db else "cant connect to db",
     }
 
 
@@ -32,17 +32,6 @@ async def user_list(
 )
 async def create_user(users: UserCreate):
     db: DatabaseSession = ContextManager.get(ContextEnum.db)
-    new_user = User(
-        first_name="new_user_first_name",
-        last_name="new_user_last_name",
-        birthdate=arrow.utcnow().datetime,
-        email="test@example.com",
-        password="password",
-        is_deleted=False,
-        join_datetime=arrow.utcnow().datetime,
-    )
-
-    db.session.add(new_user)
-    db.session.commit()
+    UserService.create_users(db, users, commit=True)
 
     return {}

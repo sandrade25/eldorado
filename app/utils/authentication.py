@@ -21,7 +21,7 @@ class AuthUtils:
         return jwt.encode(data, JWT_SIGNATURE, algorithm=JWT_ALGORITHM).encode("utf-8")
 
     @staticmethod
-    def decode_token(token: str, base_64: bool = True):
+    def decode_token(token: str):
         return jwt.decode(token, JWT_SIGNATURE, algorithms=[JWT_ALGORITHM])
 
     @staticmethod
