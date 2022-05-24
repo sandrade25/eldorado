@@ -1,6 +1,7 @@
 import arrow
 from app.models.user import User
 from app.postgres_db import DatabaseSession
+from app.schemas.user import UserCreate, UserDelete, UserUpdate
 from app.services.context import ContextEnum, ContextManager
 from app.services.user import UserService
 from fastapi import APIRouter, Depends
@@ -29,7 +30,7 @@ async def user_list(
     "/create",
     tags=["users"],
 )
-async def create_user():
+async def create_user(users: UserCreate):
     db: DatabaseSession = ContextManager.get(ContextEnum.db)
     new_user = User(
         first_name="new_user_first_name",

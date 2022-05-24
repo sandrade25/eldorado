@@ -1,6 +1,4 @@
-from contextvars import ContextVar
-from typing import Any
-
+from app.enums.context import ContextEnum
 from app.postgres_db import DatabaseSession
 from app.services.context import ContextManager
 from fastapi import Response
@@ -24,7 +22,7 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
                 db = DatabaseSession(schema)
 
                 # add db to contextvars to be accessed by route.
-                ContextManager.set(db)
+                ContextManager.set(ContextEnum.db, db)
 
                 # call route
                 response = await call_next(request)
