@@ -15,6 +15,15 @@ class UserOperator:
         return user
 
     @staticmethod
+    def get_user_by_email(db: DatabaseSession, email: str, non_deleted: bool = True):
+        stmt = select(User).where(User.email == email)
+        if non_deleted:
+            stmt = stmt.where(User.is_deleted.is_(False))
+
+        user = db.session.execute(stmt).scalar_one_or_none()
+        return user
+
+    @staticmethod
     def create(db: DatabaseSession, user: UserCreateBase, commit: bool = False):
         db.add(
             User(

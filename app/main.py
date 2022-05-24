@@ -2,7 +2,7 @@ from fastapi import APIRouter, FastAPI
 
 from app.middleware.database import DBSessionMiddleware
 from app.middleware.user import UserContextMiddleware
-from app.routers import users
+from app.routers import authentication, users
 
 app = FastAPI()
 
@@ -26,3 +26,4 @@ async def welcome():
 # additional routers
 app.include_router(router)
 app.include_router(users.router, prefix="/users", tags=["users"])
+app.include_router(authentication.router, prefix="/authentication", tags=["authentication"])

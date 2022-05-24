@@ -52,11 +52,28 @@ class AuthUtils:
     def generate_user_token(
         schema: str, user: User, valid_days: int = 5, data: Dict = {}, base_64: bool = True
     ):
-        return AuthUtils.encode_token(
+        data.update(
             {
                 "schema": schema,
                 "user_id": user.id,
                 "expiration": arrow.utcnow().shift(days=valid_days).datetime,
-            },
+            }
+        )
+        return AuthUtils.encode_token(
+            data,
             base_64,
         )
+
+    @staticmethod
+    def hash_given_string(given_str: str):
+        pass
+
+    @staticmethod
+    def unhash_given_string(given_str: str):
+        pass
+
+    @staticmethod
+    def verify_password(password: str, hashed_str: str) -> bool:
+        if password == AuthUtils.unhash_given_string(hashed_str):
+            return True
+        return False
