@@ -17,30 +17,10 @@ from sqlalchemy import select
 router = APIRouter()
 
 
-@router.get(
-    "/",
-    tags=["authentication"],
-)
-async def user_list(
-    # current_user: User = Depends(get_current_active_user),
-):
-    db: DatabaseSession = ContextManager.get(ContextEnum.db)
-    user_service: UserService = ContextManager.get(ContextEnum.user_service)
-
-    if not user_service:
-        return {"status": "not logged in"}
-
-    else:
-        return {
-            "user": user_service.user,
-            "db": db,
-        }
-
-
 @router.post("/login/", tags=["authentication"], response_model=LoginSuccess)
 async def login(credentials: LoginCredentials):
 
-    schema = credentials.schema
+    schema = credentials.schema_
     email = credentials.email
 
     # check if schema exists

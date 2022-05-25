@@ -22,10 +22,11 @@ class AuthUtils:
 
     @staticmethod
     def decode_token(token: str):
-        return jwt.decode(token, JWT_SIGNATURE, algorithms=[JWT_ALGORITHM])
+        token = jwt.decode(token, JWT_SIGNATURE, algorithms=[JWT_ALGORITHM])
+        return token
 
     @staticmethod
-    def get_user_by_token(
+    def get_user_by_hashed_token(
         db: DatabaseSession,
         token: str,
         bypass_expiration: bool = False,
@@ -33,6 +34,18 @@ class AuthUtils:
     ):
 
         data = AuthUtils.decode_token(token)
+
+        return AuthUtils.get_user_by_unhashed_token(
+            db, data, bypass_expiration=bypass_expiration, update_session=update_session
+        )
+
+    @staticmethod
+    def get_user_by_unhashed_token(
+        db: DatabaseSession,
+        data: Dict,
+        bypass_expiration: bool = False,
+        update_session: bool = True,
+    ):
 
         expiration = data.get("expiration")
         schema = data.get("schema")
@@ -56,7 +69,7 @@ class AuthUtils:
             {
                 "schema": schema,
                 "user_id": user.id,
-                "expiration": arrow.utcnow().shift(days=valid_days).datetime,
+                "expiration": arrow.utcnow().shift(days=valid_days).isoformat(),
             }
         )
         return AuthUtils.encode_token(
@@ -70,6 +83,6 @@ class AuthUtils:
 
     @staticmethod
     def verify_password(password: str, hashed_str: str) -> bool:
-        if password == HASH_CONTEXT.verify(password, hashed_str):
+        if HASH_CONTEXT.verify(password, hashed_str):
             return True
         return False

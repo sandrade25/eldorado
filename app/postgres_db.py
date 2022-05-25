@@ -29,6 +29,7 @@ class DatabaseSession:
         self.add = self.session.add
         self.delete = self.session.delete
         self.rollback = self.session.rollback
+        self.commit = self.session.commit
 
     def __del__(self):
         self.execute = None

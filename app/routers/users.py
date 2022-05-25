@@ -18,11 +18,12 @@ async def user_list(
     # current_user: User = Depends(get_current_active_user),
 ):
     db: DatabaseSession = ContextManager.get(ContextEnum.db)
-    user_service: UserService = ContextManager.get(ContextEnum.user_service)
+    user_service: UserService = ContextManager.get(ContextEnum.user_service, None)
+    # most_recent_session = user_service.user.most_recent_session
     return {
-        "user_service": user_service,
-        "db": db,
-        "users": db.session.execute(select(User)).all() if db else "cant connect to db",
+        "user_service": user_service.user.id,
+        "db": db.schema,
+        "users": "cant connect to db",
     }
 
 

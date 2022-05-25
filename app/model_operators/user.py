@@ -1,6 +1,7 @@
 from app.models.user import User
 from app.postgres_db import DatabaseSession
 from app.schemas.user import UserCreate, UserCreateBase
+from app.settings import HASH_CONTEXT
 from sqlalchemy import select
 
 
@@ -27,11 +28,11 @@ class UserOperator:
     def create(db: DatabaseSession, user: UserCreateBase, commit: bool = False):
         db.add(
             User(
-                first_name=UserCreateBase.first_name,
-                last_name=UserCreateBase.last_name,
-                birthdate=UserCreateBase.birthdate,
-                email=UserCreateBase.email,
-                password=UserCreateBase.password,  # TODO: hash this
+                first_name=user.first_name,
+                last_name=user.last_name,
+                birthdate=user.birthdate,
+                email=user.email,
+                password=HASH_CONTEXT.hash(user.password),
             )
         )
 

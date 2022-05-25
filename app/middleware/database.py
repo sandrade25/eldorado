@@ -14,7 +14,10 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
         token = ContextManager.get(ContextEnum.decoded_token)
         schema = None
         if token:
-            schema = token.get("schema")
+            schema = token.get("schema", None)
+
+        if not schema:
+            schema = headers.get("schema", None)
 
         if schema in ["null", ""]:
             schema = None
