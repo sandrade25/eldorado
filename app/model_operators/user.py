@@ -31,7 +31,7 @@ class UserOperator:
                 last_name=UserCreateBase.last_name,
                 birthdate=UserCreateBase.birthdate,
                 email=UserCreateBase.email,
-                password=UserCreateBase.password,
+                password=UserCreateBase.password,  # TODO: hash this
             )
         )
 

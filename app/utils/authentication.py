@@ -6,7 +6,7 @@ from app.enums.user import SessionState
 from app.models.user import User, UserSession
 from app.postgres_db import DatabaseSession
 from app.services.user import UserService
-from app.settings import JWT_ALGORITHM, JWT_SIGNATURE
+from app.settings import HASH_CONTEXT, JWT_ALGORITHM, JWT_SIGNATURE
 from jose import jwt
 from sqlalchemy import select
 
@@ -66,14 +66,10 @@ class AuthUtils:
 
     @staticmethod
     def hash_given_string(given_str: str):
-        pass
-
-    @staticmethod
-    def unhash_given_string(given_str: str):
-        pass
+        return HASH_CONTEXT.hash(given_str)
 
     @staticmethod
     def verify_password(password: str, hashed_str: str) -> bool:
-        if password == AuthUtils.unhash_given_string(hashed_str):
+        if password == HASH_CONTEXT.verify(password, hashed_str):
             return True
         return False
