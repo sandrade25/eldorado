@@ -51,7 +51,7 @@ def run_migrations_offline():
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        include_schemas=True,
+        include_db_schemas=True,
     )
 
     with context.begin_transaction():
@@ -70,14 +70,14 @@ def run_migrations_online():
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
-    schema = config.attributes.get("schema", "public")
+    db_schema = config.attributes.get("db_schema", "public")
 
     with connectable.connect() as connection:
-        connection.execute(f'CREATE SCHEMA IF NOT EXISTS "{schema}"')
-        connection.execute(f"set search_path to '{schema}'")
-        connection.dialect.default_schema_name = schema
+        connection.execute(f'CREATE db_schema IF NOT EXISTS "{db_schema}"')
+        connection.execute(f"set search_path to '{db_schema}'")
+        connection.dialect.default_db_schema_name = db_schema
         context.configure(
-            connection=connection, target_metadata=target_metadata, include_schemas=False
+            connection=connection, target_metadata=target_metadata, include_db_schemas=False
         )
 
         with context.begin_transaction():

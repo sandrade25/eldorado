@@ -5,7 +5,7 @@ from app.dynamo.database_connection import DatabaseConnection
 from app.model_operators.user import UserOperator
 from app.models.user import User
 from app.postgres_db import DatabaseSession
-from app.schemas.authentication import LoginCredentials, LoginSuccess
+from app.db_schemas.authentication import LoginCredentials, LoginSuccess
 from app.schemas.user import UserCreate, UserDelete, UserUpdate
 from app.services.context import ContextEnum, ContextManager
 from app.services.user import UserService
@@ -20,21 +20,21 @@ router = APIRouter()
 @router.post("/login/", tags=["authentication"], response_model=LoginSuccess)
 async def login(credentials: LoginCredentials):
 
-    schema = credentials.schema_
+    db_schema = credentials.db_schema_
     email = credentials.email
 
-    # check if schema exists
+    # check if db_schema exists
     try:
-        connection: DatabaseConnection = DatabaseConnection.get(schema)
+        connection: DatabaseConnection = DatabaseConnection.get(db_schema)
         if not connection.live or connection.maintenance:
             raise DoesNotExist
     except DoesNotExist:
         raise HTTPException(
-            status_code=403, detail="schema does not exist or is otherwise unavailable."
+            status_code=403, detail="db_schema does not exist or is otherwise unavailable."
         )
 
     # check if user exists
-    db = DatabaseSession(schema)
+    db = DatabaseSession(db_schema)
     user = UserOperator.get_user_by_email(db, email)
 
     if not user:
@@ -44,4 +44,4 @@ async def login(credentials: LoginCredentials):
     if not AuthUtils.verify_password(credentials.password, user.password):
         raise HTTPException(status_code=403, detail="password mismatch")
 
-    return LoginSuccess(token=AuthUtils.generate_user_token(schema=schema, user=user))
+    return LoginSuccess(token=AuthUtils.generate_user_token(db_schema=db_schema, user=user))

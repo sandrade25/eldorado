@@ -21,9 +21,11 @@ class AuthUtils:
         return jwt.encode(data, JWT_SIGNATURE, algorithm=JWT_ALGORITHM).encode("utf-8")
 
     @staticmethod
-    def decode_token(token: str):
-        token = jwt.decode(token, JWT_SIGNATURE, algorithms=[JWT_ALGORITHM])
-        return token
+    def decode_token(token: str, base_64: bool = True):
+        if base_64:
+            token = base64.urlsafe_b64decode(token)
+
+        return jwt.decode(token, JWT_SIGNATURE, algorithms=[JWT_ALGORITHM])
 
     @staticmethod
     def get_user_by_hashed_token(
@@ -48,11 +50,11 @@ class AuthUtils:
     ):
 
         expiration = data.get("expiration")
-        schema = data.get("schema")
+        db_schema = data.get("db_schema")
 
         _now = arrow.utcnow()
 
-        if db.schema != schema or (arrow.get(expiration) < _now and not bypass_expiration):
+        if db.db_schema != db_schema or (arrow.get(expiration) < _now and not bypass_expiration):
             raise Exception
 
         user_service = UserService(db, data.get("user_id"))
@@ -63,11 +65,11 @@ class AuthUtils:
 
     @staticmethod
     def generate_user_token(
-        schema: str, user: User, valid_days: int = 5, data: Dict = {}, base_64: bool = True
+        db_schema: str, user: User, valid_days: int = 5, data: Dict = {}, base_64: bool = True
     ):
         data.update(
             {
-                "schema": schema,
+                "db_schema": db_schema,
                 "user_id": user.id,
                 "expiration": arrow.utcnow().shift(days=valid_days).isoformat(),
             }

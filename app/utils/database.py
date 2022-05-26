@@ -9,9 +9,9 @@ Base = declarative_base()
 
 class DatabaseUtils:
     @staticmethod
-    def get_db_data(schema):
+    def get_db_data(db_schema):
         try:
-            return DatabaseConnection.get(schema)
+            return DatabaseConnection.get(db_schema)
         except DoesNotExist:
             raise
 
@@ -22,7 +22,7 @@ class DatabaseUtils:
     @staticmethod
     def get_alembic_config(
         db_model: DatabaseConnection = None,
-        skip_schema: bool = False,
+        skip_db_schema: bool = False,
         modded: bool = True,
     ):
         _config = config.Config(f"{BASE_DIR}/app/alembic.ini")
@@ -42,10 +42,10 @@ class DatabaseUtils:
                 db_name=db_model.db_name,
             ),
         )
-        if not skip_schema:
-            _config.attributes["schema"] = db_model.schema
+        if not skip_db_schema:
+            _config.attributes["db_schema"] = db_model.db_schema
         else:
-            _config.attributes["schema"] = "public"
+            _config.attributes["db_schema"] = "public"
 
         return _config
 

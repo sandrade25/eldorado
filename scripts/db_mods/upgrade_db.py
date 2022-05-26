@@ -3,10 +3,10 @@ import typer
 from app.alembic.migrations import upgrade_db
 
 
-def main(schema: str, revision: str = "head"):
-    # db_model = DatabaseConnection.get(schema)
+def main(db_schema: str, revision: str = "head"):
+    # db_model = DatabaseConnection.get(db_schema)
     # DatabaseUtils.upgrade_db(db_model=db_model, revision=revision)
-    upgrade_db(schema)
+    upgrade_db(db_schema)
 
 
 if __name__ == "__main__":

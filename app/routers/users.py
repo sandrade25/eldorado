@@ -22,7 +22,7 @@ async def user_list(
     # most_recent_session = user_service.user.most_recent_session
     return {
         "user_service": user_service.user.id,
-        "db": db.schema,
+        "db": db.db_schema,
         "users": "cant connect to db",
     }
 

@@ -12,20 +12,20 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         headers = request.headers
         token = ContextManager.get(ContextEnum.decoded_token)
-        schema = None
+        db_schema = None
         if token:
-            schema = token.get("schema", None)
+            db_schema = token.get("db_schema", None)
 
-        if not schema:
-            schema = headers.get("schema", None)
+        if not db_schema:
+            db_schema = headers.get("db_schema", None)
 
-        if schema in ["null", ""]:
-            schema = None
+        if db_schema in ["null", ""]:
+            db_schema = None
 
-        # if schema provided, try to connect to db and add to context
-        if schema:
+        # if db_schema provided, try to connect to db and add to context
+        if db_schema:
             try:
-                db = DatabaseSession(schema)
+                db = DatabaseSession(db_schema)
 
                 # add db to contextvars to be accessed by route.
                 ContextManager.set(ContextEnum.db, db)
@@ -38,7 +38,7 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
                 return Response(content=f"Exception: {exc.args[0]}", status_code=500)
 
         else:
-            # if no schema provided, assume route doesnt need it.
+            # if no db_schema provided, assume route doesnt need it.
             # let route throw exception and handle it here to return a 500.
             try:
                 ContextManager.create_empty_context(ContextEnum.db)
