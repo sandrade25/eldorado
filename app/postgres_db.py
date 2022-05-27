@@ -15,13 +15,13 @@ from app.utils.database import DatabaseUtils
 
 class DatabaseSession:
     def __init__(
-        self, db_schema: str, force_connection: bool = False, public_db_schema: bool = False
+        self, db_schema: str, force_connection: bool = False, public_schema: bool = False
     ):
         self.utils = DatabaseUtils
-        self.db_schema = db_schema
+        self.schema = db_schema
         self.db_data
-        if public_db_schema:
-            self.db_schema = "public"
+        if public_schema:
+            self.schema = "public"
 
         if not force_connection and self.db_data.maintenance:
             raise Exception
@@ -44,7 +44,7 @@ class DatabaseSession:
 
     def create_revision(self, message: str):
         db_model = self.db_data
-        db_model.db_schema = self.db_schema
+        db_model.schema = self.schema
         self.utils.create_revision(db_model, message)
 
     def add_new_db_schema(self, db_model: DatabaseConnection = None):
@@ -63,7 +63,7 @@ class DatabaseSession:
 
     @cached_property
     def db_data(self):
-        return self.utils.get_db_data(db_schema=self.db_schema)
+        return self.utils.get_db_data(db_schema=self.schema)
 
     @cached_property
     def db_url(self):
@@ -76,10 +76,10 @@ class DatabaseSession:
         )
 
     def _connect_db(self, db_schema_override: str = None):
-        db_schema = self.db_schema if not db_schema_override else db_schema_override
+        schema = self.schema if not db_schema_override else db_schema_override
         try:
             engine = create_engine(
-                self.db_url, connect_args={"options": "-csearch_path={}".format(db_schema)}
+                self.db_url, connect_args={"options": "-csearch_path={}".format(schema)}
             )
             SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
             session = SessionLocal()

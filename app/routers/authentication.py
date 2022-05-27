@@ -20,7 +20,7 @@ router = APIRouter()
 @router.post("/login/", tags=["authentication"], response_model=LoginSuccess)
 async def login(credentials: LoginCredentials):
 
-    db_schema = credentials.db_schema_
+    db_schema = credentials.db_schema
     email = credentials.email
 
     # check if db_schema exists

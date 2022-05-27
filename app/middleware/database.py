@@ -14,10 +14,10 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
         token = ContextManager.get(ContextEnum.decoded_token)
         db_schema = None
         if token:
-            db_schema = token.get("db_schema", None)
+            db_schema = token.get("schema", None)
 
         if not db_schema:
-            db_schema = headers.get("db_schema", None)
+            db_schema = headers.get("schema", None)
 
         if db_schema in ["null", ""]:
             db_schema = None

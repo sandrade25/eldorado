@@ -43,9 +43,9 @@ class DatabaseUtils:
             ),
         )
         if not skip_db_schema:
-            _config.attributes["db_schema"] = db_model.db_schema
+            _config.attributes["schema"] = db_model.schema
         else:
-            _config.attributes["db_schema"] = "public"
+            _config.attributes["schema"] = "public"
 
         return _config
 

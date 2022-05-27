@@ -70,10 +70,10 @@ def run_migrations_online():
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
-    db_schema = config.attributes.get("db_schema", "public")
+    db_schema = config.attributes.get("schema", "public")
 
     with connectable.connect() as connection:
-        connection.execute(f'CREATE db_schema IF NOT EXISTS "{db_schema}"')
+        connection.execute(f'CREATE schema IF NOT EXISTS "{db_schema}"')
         connection.execute(f"set search_path to '{db_schema}'")
         connection.dialect.default_db_schema_name = db_schema
         context.configure(

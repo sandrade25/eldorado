@@ -10,7 +10,7 @@ class DatabaseConnection(Model):
     class Meta(BaseMeta):
         table_name = "database_connection"
 
-    db_schema = UnicodeAttribute(hash_key=True)
+    schema = UnicodeAttribute(hash_key=True)
     username = UnicodeAttribute()
     password = UnicodeAttribute()
     host = UnicodeAttribute()
@@ -24,24 +24,28 @@ class DatabaseConnection(Model):
 
     def _ensure_unique_values(
         self,
-        db_schema: str = None,
+        schema: str = None,
         username: str = None,
         password: str = None,
         db_name: str = None,
     ):
-        self.db_schema = db_schema if db_schema else "{}".format(uuid4().hex[:5])
+        self.schema = schema if schema else "{}".format(uuid4().hex[:5])
         self.username = username if username else "eldorado-{}".format(uuid4().hex[:12])
         self.password = password if password else "eldorado-{}".format(uuid4().hex)
         self.db_name = db_name if db_name else "eldorado-{}".format(uuid4().hex[:12])
 
     def save(self, *args, **kwargs):
         self._ensure_unique_values(
-            db_schema=self.db_schema,
+            schema=self.schema,
             username=self.username,
             password=self.password,
             db_name=self.db_name,
         )
         super().save(*args, **kwargs)
+
+    @property
+    def url(self):
+        return f"postgresql+psycopg2://{self.username}:{self.password}@{self.host}:{self.port}/{self.db_name}"
 
 
 if not DatabaseConnection.exists():

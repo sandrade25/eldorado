@@ -12,7 +12,7 @@ def upgrade_db(db_schema: str, revision: str = "head") -> None:
     _config.set_main_option("sqlalchemy.url", db.db_url)
     with db.engine.begin() as cnxn:
         _config.attributes["connection"] = cnxn
-        _config.attributes["db_schema"] = db_schema.lower()
+        _config.attributes["schema"] = db_schema.lower()
         command.upgrade(_config, revision)
         db.db_data.maintenance_mode = False
         db.db_data.save()
@@ -26,7 +26,7 @@ def downgrade_db(db_schema: str, revision: str) -> None:
 
     with db.engine.begin() as cnxn:
         _config.attributes["connection"] = cnxn
-        _config.attributes["db_schema"] = db_schema.lower()
+        _config.attributes["schema"] = db_schema.lower()
 
         command.downgrade(_config, revision)
         db.db_data.maintenance_mode = False
@@ -39,7 +39,7 @@ def create_revision(db_schema: str, message: str) -> None:
 
     with db.engine.begin() as cnxn:
         _config.attributes["connection"] = cnxn
-        _config.attributes["db_schema"] = db_schema.lower()
+        _config.attributes["schema"] = db_schema.lower()
 
         command.revision(_config, message=message, autogenerate=True)
 

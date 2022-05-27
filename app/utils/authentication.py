@@ -69,7 +69,7 @@ class AuthUtils:
     ):
         data.update(
             {
-                "db_schema": db_schema,
+                "schema": db_schema,
                 "user_id": user.id,
                 "expiration": arrow.utcnow().shift(days=valid_days).isoformat(),
             }
