@@ -5,7 +5,7 @@ from app.schemas.user import UserCreate, UserDelete, UserUpdate
 from app.services.context import ContextEnum, ContextManager
 from app.services.user import UserService
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 router = APIRouter()
 
@@ -22,8 +22,8 @@ async def user_list(
     # most_recent_session = user_service.user.most_recent_session
     return {
         "user_service": user_service.user.id,
-        "db": db.db_schema,
-        "users": "cant connect to db",
+        "db": db.schema,
+        "users": db.execute(select(func.count(User.id))).scalar(),
     }
 
 

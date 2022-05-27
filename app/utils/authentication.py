@@ -50,11 +50,11 @@ class AuthUtils:
     ):
 
         expiration = data.get("expiration")
-        db_schema = data.get("db_schema")
+        db_schema = data.get("schema")
 
         _now = arrow.utcnow()
 
-        if db.db_schema != db_schema or (arrow.get(expiration) < _now and not bypass_expiration):
+        if db.schema != db_schema or (arrow.get(expiration) < _now and not bypass_expiration):
             raise Exception
 
         user_service = UserService(db, data.get("user_id"))

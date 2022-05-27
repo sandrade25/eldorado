@@ -18,11 +18,11 @@ class UserContextMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request, call_next):
         db = ContextManager.get(ContextEnum.db, None)
-        token = ContextManager.get(ContextEnum.decoded_token)
+        data = ContextManager.get(ContextEnum.decoded_token)
 
-        if db and token:
+        if db and data:
             # get user by token
-            user_service = AuthUtils.get_user_by_unhashed_token(db=db, token=token)
+            user_service = AuthUtils.get_user_by_unhashed_token(db=db, data=data)
             # add user to context
             ContextManager.set(ContextEnum.user_service, user_service)
 

@@ -1,4 +1,4 @@
-from app.models.user import User
+from app.models.user import User, UserSession
 from app.postgres_db import DatabaseSession
 from app.schemas.user import UserCreate, UserCreateBase
 from app.settings import HASH_CONTEXT
@@ -7,13 +7,29 @@ from sqlalchemy import select
 
 class UserOperator:
     @staticmethod
-    def get_user_by_id(db: DatabaseSession, user_id: int, non_deleted: bool = True):
-        stmt = select(User).where(User.id == user_id)
+    def get_user_by_id(
+        db: DatabaseSession,
+        user_id: int,
+        non_deleted: bool = True,
+        include_most_recent_session: bool = False,
+    ):
+        if include_most_recent_session:
+            stmt = (
+                select(User, UserSession)
+                .select_from(User)
+                .outerjoin(UserSession, UserSession.id == User.most_recent_session_id)
+            )
+        else:
+            stmt = select(User)
+
+        stmt = stmt.where(User.id == user_id)
+
         if non_deleted:
             stmt = stmt.where(User.is_deleted.is_(False))
 
-        user = db.session.execute(stmt).scalar_one_or_none()
-        return user
+        if include_most_recent_session:
+            return db.session.execute(stmt).one()
+        return db.session.execute(stmt).scalar_one_or_none()
 
     @staticmethod
     def get_user_by_email(db: DatabaseSession, email: str, non_deleted: bool = True):

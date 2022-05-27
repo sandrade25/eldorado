@@ -1,9 +1,9 @@
 import datetime
 from functools import cached_property
-from typing import ContextManager
 
 from app.enums.context import ContextEnum
 from app.enums.user import SessionState
+from app.services.context import ContextManager
 from app.utils.database import Base
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, and_, case, func, or_, select
 from sqlalchemy.dialects.postgresql import BIGINT
@@ -45,33 +45,14 @@ class User(Base):
     password = Column(String, nullable=False)
     is_deleted = Column(Boolean, default=False)
     join_datetime = Column(DateTime(timezone=True), default=func.now())
-    # most_recent_session: UserSession = column_property(
-    #     select(UserSession)
-    #     .select_from(UserSession)
-    #     .where(UserSession.user_id == id)
-    #     .order_by(UserSession.last_activity.desc())
-    #     .limit(1)
-    #     .correlate_except(UserSession)
-    #     .scalar_subquery()
-    # )
+    most_recent_session_id: int = column_property(
+        select(UserSession.id)
+        .select_from(UserSession)
+        .where(UserSession.user_id == id)
+        .order_by(UserSession.last_activity.desc())
+        .limit(1)
+        .correlate_except(UserSession)
+        .scalar_subquery()
+    )
 
     sessions = relationship("UserSession", back_populates="user")
-
-    @cached_property
-    def most_recent_session(self):
-        db = ContextManager.get(ContextEnum.db)
-        if not db:
-            raise Exception
-
-        return (
-            db.execute(
-                (
-                    select(UserSession)
-                    .where(UserSession.user_id == self.id)
-                    .order_by(UserSession.last_activity.desc())
-                    .limit(1)
-                )
-            )
-            .scalar()
-            .one_or_none()
-        )

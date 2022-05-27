@@ -26,7 +26,9 @@ class UserService:
         non_deleted: bool = True,
     ):
         self.db = db
-        self.user = self.user_operator.get_user_by_id(db, user_id, non_deleted)
+        self.user, self.most_recent_session = self.user_operator.get_user_by_id(
+            db, user_id, non_deleted, include_most_recent_session=True
+        )
         if update_session_to_now:
             self.update_session()
 
@@ -36,7 +38,7 @@ class UserService:
 
     def current_session(self):
         self._assert_user()
-        return self.user.most_recent_session
+        return self.most_recent_session
 
     def update_session(self, timestamp: dt.datetime = None):
 
@@ -46,19 +48,19 @@ class UserService:
         self._assert_user()
 
         make_new_session = False
-        if not self.user.most_recent_session:
+        if not self.most_recent_session:
             # if there isnt a recent session logged
             make_new_session = True
 
-        elif self.user.most_recent_session.is_active:
+        elif self.most_recent_session.is_active:
             # if the recent session is still active
-            self.user.most_recent_session.last_activity = timestamp
-            self.db.session.add(self.user.most_recent_session)
+            self.most_recent_session.last_activity = timestamp
+            self.db.session.add(self.most_recent_session)
 
-        elif self.user.most_recent_session.status == SessionState.active:
+        elif self.most_recent_session.status == SessionState.active:
             # if the recent session is NOT still active, but its status says it is.
-            self.user.most_recent_session.status = SessionState.inactivity
-            self.db.session.add(self.user.most_recent_session)
+            self.most_recent_session.status = SessionState.inactivity
+            self.db.session.add(self.most_recent_session)
             make_new_session = True
 
         else:
@@ -72,4 +74,4 @@ class UserService:
         self.db.session.commit()
 
         if make_new_session:
-            self.user.most_recent_session = new_session
+            self.most_recent_session = new_session
