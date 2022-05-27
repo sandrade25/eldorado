@@ -17,7 +17,7 @@ router = APIRouter()
 async def user_list(
     # current_user: User = Depends(get_current_active_user),
 ):
-    db: DatabaseSession = ContextManager.get(ContextEnum.db)
+    db: DatabaseSession = ContextManager.get(ContextEnum.db, None)
     user_service: UserService = ContextManager.get(ContextEnum.user_service, None)
     # most_recent_session = user_service.user.most_recent_session
     return {

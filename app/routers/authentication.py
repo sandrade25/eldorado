@@ -5,7 +5,7 @@ from app.dynamo.database_connection import DatabaseConnection
 from app.model_operators.user import UserOperator
 from app.models.user import User
 from app.postgres_db import DatabaseSession
-from app.db_schemas.authentication import LoginCredentials, LoginSuccess
+from app.schemas.authentication import LoginCredentials, LoginSuccess
 from app.schemas.user import UserCreate, UserDelete, UserUpdate
 from app.services.context import ContextEnum, ContextManager
 from app.services.user import UserService
