@@ -13,6 +13,7 @@ def main(first_revision: Optional[bool] = False):
         host=POSTGRES_HOST,
         port=POSTGRES_PORT,
         db_name=POSTGRES_USER,
+        schema="0123a",
     )
     db_model.save()
 

@@ -5,7 +5,19 @@ from app.enums.context import ContextEnum
 from app.enums.user import SessionState
 from app.services.context import ContextManager
 from app.utils.database import Base
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, and_, case, func, or_, select
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    String,
+    UniqueConstraint,
+    and_,
+    case,
+    func,
+    or_,
+    select,
+)
 from sqlalchemy.dialects.postgresql import BIGINT
 from sqlalchemy.orm import column_property, relationship
 
@@ -32,6 +44,10 @@ class UserSession(Base):
         )
     )
 
+    __table_args__ = (
+        UniqueConstraint("user_id", "last_activity", name="user_session_activity_uc"),
+    )
+
     user = relationship("User", back_populates="sessions")
 
 
@@ -56,3 +72,4 @@ class User(Base):
     )
 
     sessions = relationship("UserSession", back_populates="user")
+    user = relationship("UserRole", back_populates="user")

@@ -12,6 +12,7 @@ class UserOperator:
         user_id: int,
         non_deleted: bool = True,
         include_most_recent_session: bool = False,
+        include_persmissions_and_roles: bool = False,
     ):
         if include_most_recent_session:
             stmt = (
