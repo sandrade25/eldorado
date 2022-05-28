@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import arrow
 from app.enums.user import SessionState
+from app.schemas.permissions import PermissionsBase, RolesBase
 from pydantic import BaseModel, validator
 
 
@@ -21,7 +22,7 @@ class UserId(BaseModel):
 class UserLessData(BaseModel):
     first_name: Optional[str]
     last_name: Optional[str]
-    birthdate: Optional[dt.datetime]
+    birthdate: Optional[dt.date]
     email: str
 
 
@@ -40,6 +41,8 @@ class UserExtendedData(UserFullData):
 
 class UserCreateBase(UserLessData):
     password: str
+    roles: List[RolesBase]
+    permissions: List[PermissionsBase]
 
 
 class UserCreate(BaseModel):

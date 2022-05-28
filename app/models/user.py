@@ -8,6 +8,7 @@ from app.utils.database import Base
 from sqlalchemy import (
     Boolean,
     Column,
+    Date,
     DateTime,
     ForeignKey,
     String,
@@ -56,7 +57,7 @@ class User(Base):
     id = Column(BIGINT, primary_key=True, index=True)
     first_name = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
-    birthdate = Column(DateTime, nullable=True)
+    birthdate = Column(Date, nullable=True)
     email = Column(String, nullable=False)
     password = Column(String, nullable=False)
     is_deleted = Column(Boolean, default=False)
@@ -72,4 +73,5 @@ class User(Base):
     )
 
     sessions = relationship("UserSession", back_populates="user")
-    user = relationship("UserRole", back_populates="user")
+    roles = relationship("UserRole", back_populates="user")
+    permissions = relationship("UserPermission", back_populates="user")
