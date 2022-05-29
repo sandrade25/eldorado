@@ -41,8 +41,8 @@ class UserExtendedData(UserFullData):
 
 class UserCreateBase(UserLessData):
     password: str
-    roles: List[RolesBase]
-    permissions: List[PermissionsBase]
+    # roles: List[RolesBase]
+    # permissions: List[PermissionsBase]
 
 
 class UserCreate(BaseModel):

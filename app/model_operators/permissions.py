@@ -5,7 +5,7 @@ from app.models.user import User, UserSession
 from app.postgres_db import DatabaseSession
 from app.schemas.user import UserCreate, UserCreateBase
 from app.settings import HASH_CONTEXT
-from sqlalchemy import and_, case, func, null, select
+from sqlalchemy import Column, and_, case, column, func, null, select
 
 
 class PermissionsOperator:
@@ -19,7 +19,7 @@ class PermissionsOperator:
         role_permissions = (
             select(
                 Permission.id.label("permission_id"),
-                (True).label("permission_allowed"),
+                case([], else_=True).label("permission_allowed"),
             )
             .select_from(User)
             .outerjoin(UserRole, UserRole.user_id == User.id)
