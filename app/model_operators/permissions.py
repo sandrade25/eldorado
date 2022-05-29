@@ -19,7 +19,7 @@ class PermissionsOperator:
         role_permissions = (
             select(
                 Permission.id.label("permission_id"),
-                case([], else_=True).label("permission_allowed"),
+                case([(Permission.id > 0, True)], else_=True).label("permission_allowed"),
             )
             .select_from(User)
             .outerjoin(UserRole, UserRole.user_id == User.id)
@@ -43,26 +43,22 @@ class PermissionsOperator:
 
         union_sq = role_permissions.union(direct_permissions).subquery()
 
-        return (
+        qry = (
             select(
-                Permission.id,
-                Permission.name,
-                case(
-                    [
-                        (
-                            func.count(union_sq.permission_allowed).filter(
-                                and_(
-                                    union_sq.c.permission_allowed.is_(False),
-                                    union_sq.c.permission_id == Permission.id,
-                                )
-                            )
-                            > 0,
-                            False,
-                        )
-                    ],
-                    else_=union_sq.c.permission_allowed,
-                ).label("allowed"),
+                Permission.id.label("permission_id"),
+                Permission.name.label("permission_name"),
+                func.count(union_sq.c.permission_allowed)
+                .filter(union_sq.c.permission_allowed.is_(False))
+                .label("false_count"),
             )
             .select_from(Permission)
             .join(union_sq, union_sq.c.permission_id == Permission.id)
+            .group_by(Permission.id, Permission.name)
+            .where()
+        ).subquery()
+
+        return (
+            select(qry.c.permission_id, qry.c.permission_name)
+            .select_from(qry)
+            .where(qry.c.false_count == 0)
         )

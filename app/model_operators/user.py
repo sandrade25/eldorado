@@ -1,8 +1,9 @@
+from app.model_operators.permissions import PermissionsOperator
 from app.models.user import User, UserSession
 from app.postgres_db import DatabaseSession
 from app.schemas.user import UserCreate, UserCreateBase
 from app.settings import HASH_CONTEXT
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 
 class UserOperator:
@@ -11,8 +12,8 @@ class UserOperator:
         db: DatabaseSession,
         user_id: int,
         non_deleted: bool = True,
-        include_most_recent_session: bool = False,
-        include_persmissions_and_roles: bool = False,
+        include_most_recent_session: bool = True,
+        include_permissions: bool = True,
     ):
         if include_most_recent_session:
             stmt = (
@@ -28,7 +29,20 @@ class UserOperator:
         if non_deleted:
             stmt = stmt.where(User.is_deleted.is_(False))
 
-        if include_most_recent_session:
+        if include_permissions:
+            permissions_sq = PermissionsOperator.get_query_for_user_permissions_by_id(
+                db, user_id=user_id
+            ).subquery()
+            stmt = stmt.add_columns(
+                func.array(select(permissions_sq.c.permission_id).subquery()).label(
+                    "permission_ids"
+                ),
+                func.array(select(permissions_sq.c.permission_name).subquery()).label(
+                    "permission_name"
+                ),
+            )
+
+        if include_most_recent_session or include_permissions:
             return db.session.execute(stmt).one()
         return db.session.execute(stmt).scalar_one_or_none()
 

@@ -24,10 +24,21 @@ class UserService:
         user_id: int,
         update_session_to_now: bool = False,
         non_deleted: bool = True,
+        include_most_recent_session: bool = True,
+        include_permissions: bool = True,
     ):
         self.db = db
-        self.user, self.most_recent_session = self.user_operator.get_user_by_id(
-            db, user_id, non_deleted, include_most_recent_session=True
+        (
+            self.user,
+            self.most_recent_session,
+            self.permission_ids,
+            self.permission_names,
+        ) = self.user_operator.get_user_by_id(
+            db,
+            user_id,
+            non_deleted,
+            include_most_recent_session=include_most_recent_session,
+            include_permissions=include_permissions,
         )
         if update_session_to_now:
             self.update_session()
