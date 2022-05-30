@@ -1,20 +1,31 @@
-from typing import Tuple
+from typing import List
 
-from app.middleware.database import db_context
-from app.models.user import User, UserSession
-from app.postgres_db import DatabaseSession
-from app.settings import DEVELOPMENT_MODE, JWT_ALGORITHM, JWT_SIGNATURE, PASSWORD_CONTEXT
-from app.utils.authentication import AuthUtils
-from fastapi import Depends, Security
+from app.services.context import ContextEnum, ContextManager
+from app.services.user import UserService
+from fastapi import Depends
+from fastapi.exceptions import HTTPException
 from fastapi.security.oauth2 import OAuth2PasswordBearer
-from jose import jwt
-from jose.exceptions import JWTError
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-# NOT IN USE.
-# async def get_user_by_token(
-#     token: str = Depends(oauth_scheme),
-# ) -> User:
-#     db = db_context.get()
-#     return AuthUtils.get_user_by_token(db, token)
+
+def get_user_service_from_context():
+    return ContextManager.get(ContextEnum.user_service, None)
+
+
+def user_has_permissions(
+    permission_names_list: List[str],
+    user_service: UserService = Depends(get_user_service_from_context),
+):
+    if not user_service:
+        raise HTTPException(status_code=403, detail="User not logged in")
+
+    permission_names = user_service.permission_names
+
+    res = any(item in permission_names_list for item in permission_names)
+
+    if not res:
+        raise HTTPException(status_code=403, detail="User does not have the required permissions")
+
+    else:
+        return True

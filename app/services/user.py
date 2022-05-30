@@ -3,12 +3,10 @@ import datetime as dt
 import arrow
 from app.enums.user import SessionState
 from app.model_operators.user import UserOperator
-from app.models.user import User, UserSession
+from app.models.user import UserSession
 from app.postgres_db import DatabaseSession
 from app.schemas.user import UserCreate
 from app.services.exceptions import ServiceDataError
-from sqlalchemy import select
-from sqlalchemy.exc import NoResultFound
 
 
 class UserService:
