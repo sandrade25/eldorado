@@ -31,7 +31,7 @@ async def user_list(
     "/create",
     tags=["users"],
 )
-async def create_user(users: UserCreate):
+async def create_user(users: UserCreate, dependencies=[Depends(SETTINGS_ADMIN_PERMISSIONS)]):
     db: DatabaseSession = ContextManager.get(ContextEnum.db)
     UserService.create_users(db, users, commit=True)
 
