@@ -15,7 +15,7 @@ def get_user_service_from_context():
 
 def user_has_permissions(
     permission_names_list: List[str],
-    user_service: UserService = Depends(get_user_service_from_context),
+    user_service: UserService,
 ):
     if not user_service:
         raise HTTPException(status_code=403, detail="User not logged in")
@@ -29,3 +29,12 @@ def user_has_permissions(
 
     else:
         return True
+
+
+class Permissions:
+    def __init__(self, permission_names_list: List[str]):
+        self.permission_names_list = permission_names_list
+
+    def __call__(self, user_service: UserService = Depends(get_user_service_from_context)):
+        print("test")
+        return user_has_permissions(self.permission_names_list, user_service)

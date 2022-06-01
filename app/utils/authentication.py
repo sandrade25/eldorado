@@ -8,7 +8,6 @@ from app.postgres_db import DatabaseSession
 from app.services.user import UserService
 from app.settings import HASH_CONTEXT, JWT_ALGORITHM, JWT_SIGNATURE
 from jose import jwt
-from sqlalchemy import select
 
 
 class AuthUtils:

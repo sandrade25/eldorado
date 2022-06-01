@@ -1,5 +1,6 @@
 import arrow
 from app.models.user import User
+from app.permissions.user_crud import can_create_user
 from app.postgres_db import DatabaseSession
 from app.schemas.user import UserCreate, UserDelete, UserUpdate
 from app.services.context import ContextEnum, ContextManager
@@ -27,11 +28,10 @@ async def user_list(
     }
 
 
-@router.post(
-    "/create",
-    tags=["users"],
-)
-async def create_user(users: UserCreate, dependencies=[Depends(SETTINGS_ADMIN_PERMISSIONS)]):
+@router.post("/create", tags=["users"], dependencies=[Depends(can_create_user)])
+async def create_user(
+    users: UserCreate,
+):
     db: DatabaseSession = ContextManager.get(ContextEnum.db)
     UserService.create_users(db, users, commit=True)
 
