@@ -36,5 +36,4 @@ class Permissions:
         self.permission_names_list = permission_names_list
 
     def __call__(self, user_service: UserService = Depends(get_user_service_from_context)):
-        print("test")
         return user_has_permissions(self.permission_names_list, user_service)

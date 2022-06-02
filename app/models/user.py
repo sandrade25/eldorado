@@ -75,3 +75,5 @@ class User(Base):
     sessions = relationship("UserSession", back_populates="user")
     roles = relationship("UserRole", back_populates="user")
     permissions = relationship("UserPermission", back_populates="user")
+
+    __table_args__ = (UniqueConstraint("email", name="user_email_uc"),)
