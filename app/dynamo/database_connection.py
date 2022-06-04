@@ -23,9 +23,13 @@ class DatabaseConnection(Model):
     date_created = UTCDateTimeAttribute(default=arrow.utcnow().datetime)
 
     def _ensure_unique_values(
-        self, schema: str = None, username: str = None, password: str = None, db_name: str = None
+        self,
+        schema: str = None,
+        username: str = None,
+        password: str = None,
+        db_name: str = None,
     ):
-        self.schema = schema if schema else "eldorado-{}".format(uuid4().hex[:5])
+        self.schema = schema if schema else "{}".format(uuid4().hex[:5])
         self.username = username if username else "eldorado-{}".format(uuid4().hex[:12])
         self.password = password if password else "eldorado-{}".format(uuid4().hex)
         self.db_name = db_name if db_name else "eldorado-{}".format(uuid4().hex[:12])
@@ -38,6 +42,10 @@ class DatabaseConnection(Model):
             db_name=self.db_name,
         )
         super().save(*args, **kwargs)
+
+    @property
+    def url(self):
+        return f"postgresql+psycopg2://{self.username}:{self.password}@{self.host}:{self.port}/{self.db_name}"
 
 
 if not DatabaseConnection.exists():

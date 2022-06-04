@@ -7,81 +7,21 @@ from functools import cached_property
 
 from pynamodb.exceptions import DoesNotExist
 from sqlalchemy import MetaData, create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from alembic import command, config
 from app.dynamo.database_connection import DatabaseConnection
-from app.settings import BASE_DIR
-
-Base = declarative_base()
-
-
-class DatabaseUtils:
-    @staticmethod
-    def get_db_data(schema):
-        try:
-            return DatabaseConnection.get(schema)
-        except DoesNotExist:
-            raise
-
-    @staticmethod
-    def db_url(username: str, password: str, host: str, port: str, db_name: str = ""):
-        return f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}"
-
-    @staticmethod
-    def get_alembic_config(
-        db_model: DatabaseConnection = None,
-        skip_schema: bool = False,
-        modded: bool = True,
-    ):
-        _config = config.Config(f"{BASE_DIR}/app/alembic.ini")
-        if not modded:
-            return _config
-
-        if not db_model:
-            raise Exception
-
-        _config.set_main_option(
-            "sqlalchemy.url",
-            DatabaseUtils.db_url(
-                username=db_model.username,
-                password=db_model.password,
-                host=db_model.host,
-                port=db_model.port,
-            ),
-        )
-        if not skip_schema:
-            _config.attributes["schema"] = db_model.schema
-        else:
-            _config.attributes["schema"] = "public"
-
-        return _config
-
-    @staticmethod
-    def create_revision(schema: str, message: str):
-        db_model = DatabaseConnection.get(schema)
-        _config = DatabaseUtils.get_alembic_config(db_model=db_model)
-
-        command.revision(config=_config, message=message, autogenerate=True)
-
-    @staticmethod
-    def upgrade_db(schema: str, revision: str = "head") -> None:
-        db_model = DatabaseConnection.get(schema)
-        db_model.maintenance = True
-        db_model.save()
-
-        _config = DatabaseUtils.get_alembic_config(db_model=db_model)
-
-        command.upgrade(_config, revision)
-        db_model.maintenance = False
-        db_model.save()
+from app.utils.database import DatabaseUtils
 
 
 class DatabaseSession:
-    def __init__(self, schema: str, force_connection: bool = False, public_schema: bool = False):
+    def __init__(
+        self, db_schema: str, force_connection: bool = False, public_schema: bool = False
+    ):
         self.utils = DatabaseUtils
-        self.schema = schema if not public_schema else "public"
+        self.schema = db_schema
+        self.db_data
+        if public_schema:
+            self.schema = "public"
 
         if not force_connection and self.db_data.maintenance:
             raise Exception
@@ -91,6 +31,8 @@ class DatabaseSession:
         self.add = self.session.add
         self.delete = self.session.delete
         self.rollback = self.session.rollback
+        self.commit = self.session.commit
+        self.query = self.session.query
 
     def __del__(self):
         self.execute = None
@@ -100,7 +42,12 @@ class DatabaseSession:
         self.session.close()
         self.engine.dispose()
 
-    def add_new_schema(self, db_model: DatabaseConnection = None):
+    def create_revision(self, message: str):
+        db_model = self.db_data
+        db_model.schema = self.schema
+        self.utils.create_revision(db_model, message)
+
+    def add_new_db_schema(self, db_model: DatabaseConnection = None):
         if not db_model:
             db_model = DatabaseConnection(
                 username=self.db_data.username,
@@ -111,14 +58,12 @@ class DatabaseSession:
             )
 
         db_model.save()
-        with self.engine.begin() as connection:
-            _config = self.utils.get_alembic_config(db_model=db_model)
-            _config.attributes["connection"] = connection
-            command.upgrade(_config, "head")
+
+        self.utils.upgrade_db(db_model=db_model)
 
     @cached_property
     def db_data(self):
-        return self.utils.get_db_data(schema=self.schema)
+        return self.utils.get_db_data(db_schema=self.schema)
 
     @cached_property
     def db_url(self):
@@ -130,14 +75,15 @@ class DatabaseSession:
             db_name=self.db_data.db_name,
         )
 
-    def _connect_db(self):
+    def _connect_db(self, db_schema_override: str = None):
+        schema = self.schema if not db_schema_override else db_schema_override
         try:
             engine = create_engine(
-                self.db_url, connect_args={"options": "-csearch_path={}".format(self.schema)}
+                self.db_url, connect_args={"options": "-csearch_path={}".format(schema)}
             )
             SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
             session = SessionLocal()
-            metadata = MetaData(bind=self.engine)
+            metadata = MetaData(bind=engine)
             metadata.create_all(engine)
             return engine, session
         except (DoesNotExist, AttributeError, ValueError):

@@ -7,8 +7,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": [
-            ]
+            "args": []
         },
         {
             "name": "Python: Current File",
@@ -26,6 +25,8 @@
                 "app.main:app",
                 "--port",
                 "8081",
+                "--workers",
+                "8"
             ],
             "justMyCode": false
         }
