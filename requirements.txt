@@ -75,6 +75,7 @@ python-apt==2.0.0+ubuntu0.20.4.7
 python-dateutil==2.8.1
 python-decouple==3.3
 python-jose==3.3.0
+python-json-logger==2.0.2
 pytz==2020.1
 pyzmq==22.3.0
 requests==2.24.0

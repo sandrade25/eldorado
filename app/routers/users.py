@@ -1,5 +1,7 @@
+import logging
 from typing import List
 
+from app.logger import logger
 from app.model_operators.user import UserOperator
 from app.permissions.user_crud import can_create_user, can_view_other_user_data
 from app.postgres_db import DatabaseSession
@@ -18,12 +20,13 @@ router = APIRouter()
     response_model=List[UserExtendedData],
     dependencies=[Depends(can_view_other_user_data)],
 )
-async def user_list(
-    # current_user: User = Depends(get_current_active_user),
-):
+async def user_list():
     db: DatabaseSession = ContextManager.get(ContextEnum.db, None)
     stmt = UserOperator.get_all_users(with_sessions=True, non_deleted=True)
     db_users = db.execute(stmt).all()
+
+    logger.info("test message here!!")
+    logger.debug("debug message here!!")
 
     users = []
     for user, session in db_users:
