@@ -82,3 +82,17 @@ class UserOperator:
 
         if commit:
             db.commit()
+
+    @staticmethod
+    def get_all_users(with_sessions: bool = False, non_deleted: bool = True):
+        stmt = select(User)
+
+        if with_sessions:
+            stmt = stmt.add_columns(UserSession).outerjoin(
+                UserSession, UserSession.id == User.most_recent_session_id
+            )
+
+        if non_deleted:
+            stmt = stmt.where(User.is_deleted.is_(False))
+
+        return stmt

@@ -4,6 +4,7 @@ import arrow
 from app.enums.user import SessionState
 from app.model_operators.user import UserOperator
 from app.models.user import User, UserSession
+from app.permissions.enum import PermissionsEnum
 from app.postgres_db import DatabaseSession
 from app.schemas.user import UserCreate
 from app.services.exceptions import ServiceDataError
@@ -90,3 +91,12 @@ class UserService:
 
         if make_new_session:
             self.most_recent_session = new_session
+
+    def allowed_to_view_user_info(self, user_id: int):
+        if (
+            PermissionsEnum.can_view_other_user_data.value in self.permission_names
+            or self.user.id == user_id
+        ):
+            return True
+
+        return False
