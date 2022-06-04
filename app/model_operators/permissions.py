@@ -1,11 +1,8 @@
-from typing import List
-
 from app.models.permissions import Permission, Role, RolePermission, UserPermission, UserRole
-from app.models.user import User, UserSession
+from app.models.user import User
+from app.permissions.enum import PermissionsEnum
 from app.postgres_db import DatabaseSession
-from app.schemas.user import UserCreate, UserCreateBase
-from app.settings import HASH_CONTEXT
-from sqlalchemy import Column, and_, case, column, func, null, select
+from sqlalchemy import case, func, select
 
 
 class PermissionsOperator:
@@ -62,3 +59,9 @@ class PermissionsOperator:
             .select_from(qry)
             .where(qry.c.false_count == 0)
         )
+
+    @staticmethod
+    def create_base_permissions(db: DatabaseSession):
+        for data in PermissionsEnum:
+            db.add(Permission(name=data.value))
+        db.commit()

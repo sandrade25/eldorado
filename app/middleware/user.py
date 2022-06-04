@@ -1,14 +1,7 @@
-import traceback
-from contextvars import ContextVar
-from typing import Any
-
-from app.models.user import User
-from app.postgres_db import DatabaseSession
 from app.services.context import ContextEnum, ContextManager
-from app.services.user import UserService
-from app.settings import ENVIRONMENT
+
 from app.utils.authentication import AuthUtils
-from fastapi import Response
+
 from starlette.middleware.base import BaseHTTPMiddleware
 
 

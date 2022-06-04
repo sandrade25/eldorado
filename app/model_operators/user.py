@@ -1,3 +1,5 @@
+from typing import List
+
 from app.model_operators.permissions import PermissionsOperator
 from app.models.user import User, UserSession
 from app.postgres_db import DatabaseSession
@@ -59,10 +61,10 @@ class UserOperator:
     def create(db: DatabaseSession, user: UserCreateBase, commit: bool = False):
         db.add(
             User(
-                first_name=user.first_name,
-                last_name=user.last_name,
+                first_name=user.first_name.lower(),
+                last_name=user.last_name.lower(),
                 birthdate=user.birthdate,
-                email=user.email,
+                email=user.email.lower(),
                 password=HASH_CONTEXT.hash(user.password),
             )
         )
@@ -71,9 +73,12 @@ class UserOperator:
             db.commit()
 
     @staticmethod
-    def batch_create(db: DatabaseSession, users: UserCreate, commit: bool = False):
+    def batch_create(
+        db: DatabaseSession, users: UserCreate, skip_emails: List[str] = [], commit: bool = False
+    ):
         for user in users.users:
-            UserOperator.create(db=db, user=user, commit=False)
+            if user.email.lower() not in skip_emails:
+                UserOperator.create(db=db, user=user, commit=False)
 
         if commit:
             db.commit()

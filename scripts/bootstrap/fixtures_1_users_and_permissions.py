@@ -1,11 +1,8 @@
-from typing import Optional
-
 import typer
-from app.dynamo.database_connection import DatabaseConnection
+from app.model_operators.permissions import PermissionsOperator
 from app.model_operators.user import UserOperator
 from app.postgres_db import DatabaseSession
-from app.schemas.user import PermissionsBase, RolesBase, UserCreate, UserCreateBase
-from app.settings import POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_PORT, POSTGRES_USER
+from app.schemas.user import UserCreate, UserCreateBase
 from faker import Faker
 
 
@@ -13,6 +10,7 @@ def main(db_schema: str = "0123a", user_count: int = 5):
     faker = Faker()
 
     db = DatabaseSession(db_schema=db_schema)
+    PermissionsOperator.create_base_permissions(db)
 
     # create users
     users_to_create = UserCreate(users=[])

@@ -3,10 +3,11 @@ import datetime as dt
 import arrow
 from app.enums.user import SessionState
 from app.model_operators.user import UserOperator
-from app.models.user import UserSession
+from app.models.user import User, UserSession
 from app.postgres_db import DatabaseSession
 from app.schemas.user import UserCreate
 from app.services.exceptions import ServiceDataError
+from sqlalchemy import select
 
 
 class UserService:
@@ -14,7 +15,12 @@ class UserService:
 
     @staticmethod
     def create_users(db: DatabaseSession, users: UserCreate, commit: bool = False):
-        UserService.user_operator.batch_create(db, users, commit=commit)
+        # check if any of the emails provided already exist. if they do,
+        # remove them before creating users
+        emails = [u.email.lower() for u in users.users]
+        skip_emails = db.execute(select(User.email).where(User.email.in_(emails))).scalars().all()
+
+        UserService.user_operator.batch_create(db, users, skip_emails=skip_emails, commit=commit)
 
     def __init__(
         self,
