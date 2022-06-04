@@ -1,5 +1,8 @@
+import logging
+
 from fastapi import APIRouter, FastAPI
 
+from app.logger import logger
 from app.middleware.database import DBSessionMiddleware
 from app.middleware.token import TokenContextMiddleware
 from app.middleware.user import UserContextMiddleware
@@ -7,8 +10,9 @@ from app.routers import authentication, users
 
 app = FastAPI()
 
-# middleware
+app.logger = logger
 
+# middleware
 app.add_middleware(UserContextMiddleware)
 app.add_middleware(DBSessionMiddleware)
 app.add_middleware(TokenContextMiddleware)
