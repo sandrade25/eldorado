@@ -13,6 +13,12 @@ def get_user_service_from_context():
     return ContextManager.get(ContextEnum.user_service, None)
 
 
+def is_logged_in():
+    user = ContextManager.get(ContextEnum.user_service, None)
+    if not user:
+        raise HTTPException(status_code=403, detail="User must be logged in")
+
+
 def user_has_permissions(
     permission_names_list: List[str],
     user_service: UserService,
